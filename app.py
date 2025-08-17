@@ -25,6 +25,18 @@ if uploaded_file is not None:
             except ValueError as e:
                 errors.append(f"Error converting timestamps: {str(e)}. Ensure format is 'Day, Month DD, YYYY HH:MM'.")
             
+            # Process Meter names to remove everything after the last " - "
+            try:
+                for column in df.columns:
+                    if column != "Timestamp":
+                        # Extract Meter_Name by taking text before the last " - "
+                        new_name = column.rsplit(" - ", 1)[0]
+                        df.rename(columns={column: new_name}, inplace=True)
+            except IndexError as e:
+                errors.append(f"Error processing meter names: {str(e)}. Ensure meter names contain ' - ' separator.")
+            except Exception as e:
+                errors.append(f"Unexpected error processing meter names: {str(e)}.")
+            
             # Melt the dataframe to convert from wide to long format
             try:
                 melted_df = pd.melt(df, 
