@@ -13,7 +13,7 @@ uploaded_file = st.file_uploader("Upload your data file", type=["xlsx", "xls", "
 def extract_meter_and_reading(column_name):
     """
     Extract meter name and reading type from column name
-    Format: "MeterName - ReadingType (unit)" or "MeterName - ReadingType_unit"
+    Format: "MeterName - ReadingType (unit)" 
     Returns: (meter_name, reading_type, unit)
     """
     if " - " not in column_name:
@@ -24,23 +24,20 @@ def extract_meter_and_reading(column_name):
     meter_name = parts[0].strip()
     reading_part = parts[1].strip()
     
-    # Extract reading type and unit using regex
-    # Pattern for "ReadingType (unit)"
-    pattern_with_parentheses = r"^(.*?)\s*\((.*?)\)$"
-    match = re.match(pattern_with_parentheses, reading_part)
-    
-    if match:
-        reading_type = match.group(1).strip()
-        unit = match.group(2).strip()
-    else:
-        # Pattern for "ReadingType_unit" or just "ReadingType"
-        if "_" in reading_part:
-            reading_parts = reading_part.rsplit("_", 1)
-            reading_type = reading_parts[0].strip()
-            unit = reading_parts[1].strip()
+    # Extract reading type as everything before first "("
+    if "(" in reading_part:
+        reading_type = reading_part.split("(")[0].strip()
+        # Extract unit as everything within first parentheses
+        unit_start = reading_part.find("(") + 1
+        unit_end = reading_part.find(")")
+        if unit_end > unit_start:
+            unit = reading_part[unit_start:unit_end].strip()
         else:
-            reading_type = reading_part
             unit = "Unknown Unit"
+    else:
+        # If no parentheses, use the whole reading part as reading type
+        reading_type = reading_part
+        unit = "Unknown Unit"
     
     return meter_name, reading_type, unit
 
